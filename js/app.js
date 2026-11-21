@@ -637,6 +637,7 @@ function recogerDatosFormulario() {
 form.addEventListener("submit", (event) => {
     event.preventDefault();
 
+    // 1. Validar el formulario
     const errores = actualizarErroresFormulario();
 
     if (Object.keys(errores).length > 0 || !form.checkValidity()) {
@@ -644,7 +645,73 @@ form.addEventListener("submit", (event) => {
         return;
     }
 
-    // La creación del pedido corresponde a la Fase 8.
+    // 2. Comprobar que el carrito no esté vacío
+    if (carrito.length === 0) {
+        mostrarErrorFormulario("El carrito está vacío. Añade algún producto.");
+        return;
+    }
+
+    // 3. Comprobar nuevamente el stock
+    const lineasNoDisponibles = comprobarStockCarrito(carrito, catalogo);
+
+    if (lineasNoDisponibles.length > 0) {
+
+        let mensaje = "No hay stock suficiente para los siguientes productos: ";
+
+        lineasNoDisponibles.forEach((item) => {
+            mensaje += `${item.nombre} (solicitadas: ${item.solicitada}, disponibles: ${item.disponible}). `;
+        });
+
+        mostrarErrorFormulario(mensaje);
+        return;
+    }
+
+    // Recoger los datos del formulario
+    const datos = recogerDatosFormulario();
+
+    // 4. Crear el pedido
+    const pedido = crearPedido(datos);
+
+    // 5. Descontar el stock
+    carrito.forEach((item) => {
+        const producto = catalogo.find((producto) => {
+            return producto.id === item.productoId;
+        });
+
+        producto.descontarStock(item.cantidad);
+    });
+
+    // 6. Añadir el pedido al historial
+    pedidos.push(pedido);
+
+    // 7. Vaciar el carrito sin reasignarlo
+    carrito.splice(0, carrito.length);
+
+    // 8. Reiniciar el formulario
+    form.reset();
+
+    // Actualizar manualmente los campos y el contador
+    actualizarCamposEnvio();
+    actualizarContador();
+    limpiarErroresFormulario();
+
+    // Limpiar mensajes
+    ocultarErrorFormulario();
+
+    // Mostrar mensaje de éxito
+    const mensajeExito = document.querySelector("#mensaje-exito");
+
+    mensajeExito.textContent = "¡Pedido realizado correctamente!";
+    mensajeExito.hidden = false;
+
+    // 9. Actualizar las vistas
+    actualizarCatalogo();
+    mostrarCarrito();
+
+    // Actualizar historial cuando exista su función
+    if (typeof mostrarHistorial === "function") {
+        mostrarHistorial();
+    }
 });
 
 // Actualizar campos al cambiar la modalidad
