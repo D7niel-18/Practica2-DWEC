@@ -90,6 +90,7 @@ Contiene únicamente el arranque: las primeras llamadas de pintado y de preparac
 
 Los scripts se cargan desde index.html con defer, en este orden:
 
+```
 html
 <script src="js/producto.js" defer></script>
 <script src="js/datos.js" defer></script>
@@ -101,7 +102,7 @@ html
 <script src="js/pedidos.js" defer></script>
 <script src="js/historial.js" defer></script>
 <script src="js/app.js" defer></script>
-
+```
 
 Los scripts con defer se descargan en paralelo, pero se ejecutan cuando el HTML está analizado y en el orden en que aparecen. El orden importa porque cada fichero usa lo definido en los anteriores. Se han utilizado scripts clásicos y no módulos ES para que todas las funciones y colecciones sigan accesibles desde la consola de DevTools, donde se ejecutan algunas pruebas.
 
