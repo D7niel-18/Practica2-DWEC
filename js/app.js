@@ -18,6 +18,7 @@ const datosProductos = [
 const carrito = [];
 const pedidos = [];
 
+
 // Clase Producto
 class Producto {
     constructor(id, nombre, categoria, precio, stock) {
@@ -80,7 +81,7 @@ const catalogo = datosProductos.map((producto) => {
     );
 });
 
-/* FASE 3 */ 
+// Fase 3
 const SUBTOTAL_MINIMO_DESCUENTO = 100;
 const PORCENTAJE_DESCUENTO = 0.1;
 
@@ -177,6 +178,7 @@ function crearTarjetaProducto(producto) {
     const boton = document.createElement("button");
     boton.type = "button";
     boton.textContent = "Añadir al carrito";
+    // Boton [clase] --> Añadir productos al carrito
     boton.classList.add("boton-anadir");
 
     // Contenedor de acciones
@@ -351,6 +353,7 @@ function mostrarCarrito() {
     vistaTotal.textContent = total.toFixed(2) + " €";
 }
 
+// Función para mostrar errores
 function mostrarErrorCarrito(mensaje) {
     const error = document.querySelector("#error-carrito");
 
@@ -358,6 +361,7 @@ function mostrarErrorCarrito(mensaje) {
     error.hidden = false;
 }
 
+// Función para ocultar errores
 function ocultarErrorCarrito() {
     const error = document.querySelector("#error-carrito");
 
@@ -444,6 +448,7 @@ listaProductos.addEventListener("click", (event) => {
     mostrarCarrito();
 });
 
+// Retirar líneas del carrito
 const lineasCarrito = document.querySelector("#lineas-carrito");
 
 lineasCarrito.addEventListener("click", (event) => {
@@ -477,6 +482,185 @@ lineasCarrito.addEventListener("click", (event) => {
     mostrarCarrito();
 });
 
-// Arranque de la aplicación
-actualizarCatalogo();
-mostrarCarrito();
+// Fase 7
+
+// Campos condicionales y contador
+function actualizarCamposEnvio() {
+    const modalidad = form.elements.namedItem("modalidad").value;
+
+    const datosEnvio = document.querySelector("#datos-envio");
+    const direccion = form.elements.namedItem("direccion");
+    const codigoPostal = form.elements.namedItem("codigoPostal");
+
+    const esEnvio = modalidad === "envio";
+
+    datosEnvio.hidden = !esEnvio;
+
+    direccion.required = esEnvio;
+    codigoPostal.required = esEnvio;
+
+    if (!esEnvio) {
+        direccion.value = "";
+        codigoPostal.value = "";
+
+        direccion.setCustomValidity("");
+        codigoPostal.setCustomValidity("");
+
+        direccion.classList.remove("campo-invalido");
+        codigoPostal.classList.remove("campo-invalido");
+
+        document.querySelector("#error-direccion").textContent = "";
+        document.querySelector("#error-codigo-postal").textContent = "";
+    }
+}
+
+// Actualizar contador de observaciones
+function actualizarContador() {
+    const observaciones = form.elements.namedItem("observaciones");
+    const contador = document.querySelector("#contador-observaciones");
+
+    const longitud = observaciones.value.length;
+
+    contador.textContent = `${longitud}/200`;
+
+    contador.parentElement.classList.toggle("contador--limite", longitud >= 200);
+}
+
+// Validacion de datos pura
+function validarDatosPedido(datos) {
+    const errores = {};
+
+    // Nombre
+    const nombre = datos.nombre.trim();
+
+    if (nombre.length < 2 || nombre.length > 60) {
+        errores.nombre = "El nombre debe tener entre 2 y 60 caracteres.";
+    }
+
+    // Email
+    const email = datos.email.trim();
+    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+    if (email === "") {
+        errores.email = "El email es obligatorio.";
+    } else if (!regexEmail.test(email)) {
+        errores.email = "Introduce un email válido.";
+    }
+
+    // Modalidad
+    if (!["envio", "recogida"].includes(datos.modalidad)) {
+        errores.modalidad = "Selecciona una modalidad válida.";
+    }
+
+    // Dirección y código postal
+    if (datos.modalidad === "envio") {
+        const direccion = datos.direccion.trim();
+
+        if (direccion.length < 5 || direccion.length > 100) {
+            errores.direccion = "La dirección debe tener entre 5 y 100 caracteres.";
+        }
+
+        const regexCodigoPostal = /^(0[1-9]|[1-4][0-9]|5[0-2])[0-9]{3}$/;
+
+        if (!regexCodigoPostal.test(datos.codigoPostal)) {
+            errores.codigoPostal = "Introduce un código postal válido.";
+        }
+    }
+
+    // Observaciones
+    if (datos.observaciones.length > 200) {
+        errores.observaciones = "Las observaciones no pueden superar los 200 caracteres.";
+    }
+
+    // Aceptación
+    if (!datos.aceptar) {
+        errores.aceptar = "Debes aceptar las condiciones.";
+    }
+
+    return errores;
+}
+
+function actualizarErroresFormulario() {
+    const datos = recogerDatosFormulario();
+    const errores = validarDatosPedido(datos);
+
+    const campos = [
+        "nombre",
+        "email",
+        "direccion",
+        "codigoPostal",
+        "observaciones",
+        "aceptar"
+    ];
+
+    campos.forEach((campo) => {
+        const control = form.elements.namedItem(campo);
+        const nombreError = campo === "codigoPostal" ? "codigo-postal" : campo;
+        const mensaje = document.querySelector(`#error-${nombreError}`);
+
+        const error = errores[campo] || "";
+
+        control.setCustomValidity(error);
+        control.classList.toggle("campo-invalido", error !== "");
+
+        if (mensaje) {
+            mensaje.textContent = error;
+        }
+    });
+
+    return errores;
+}
+
+// Recoger los datos del formulario
+const form = document.querySelector("#form-pedido");
+
+function recogerDatosFormulario() {
+    const datosFormulario = new FormData(form);
+
+    const modalidad = datosFormulario.get("modalidad") || "";
+
+    return {
+        nombre: datosFormulario.get("nombre") || "",
+        email: datosFormulario.get("email") || "",
+        modalidad: modalidad,
+
+        direccion: modalidad === "recogida" ? "" : datosFormulario.get("direccion") || "",
+
+        codigoPostal: modalidad === "recogida" ? "" : datosFormulario.get("codigoPostal") || "",
+
+        observaciones: datosFormulario.get("observaciones") || "",
+        aceptar: datosFormulario.get("aceptar") !== null
+    };
+}
+
+// Evento submit
+form.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const errores = actualizarErroresFormulario();
+
+    if (Object.keys(errores).length > 0 || !form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    // La creación del pedido corresponde a la Fase 8.
+});
+
+// Actualizar campos al cambiar la modalidad
+form.addEventListener("change", () => {
+    actualizarCamposEnvio();
+    actualizarErroresFormulario();
+});
+
+form.addEventListener("input", () => {
+    actualizarErroresFormulario();
+});
+
+form.elements.namedItem("observaciones").addEventListener("input", () => {
+    actualizarContador();
+});
+
+// Arranque
+actualizarCamposEnvio();
+actualizarContador();
