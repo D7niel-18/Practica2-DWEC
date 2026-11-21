@@ -19,7 +19,7 @@ La aplicación permite buscar y filtrar productos, controlar el stock disponible
 
 ## 3. Estructura de carpetas
 
-```text
+```
 proyecto/
 │
 ├── index.html
