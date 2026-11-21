@@ -814,8 +814,17 @@ function crearPedido(datos) {
     });
 
     // Crear el objeto pedido
+    function crearID() {
+        let id = Math.floor(Math.random() * 1000000) + 1;
+
+        while (pedidos.some(pedido => pedido.id === id)) {
+            id = Math.floor(Math.random() * 1000000) + 1;
+        }
+
+        return id;
+    }
     const pedido = {
-        id: Date.now(),
+        id: crearID(),
         fecha: new Date().toISOString(),
 
         cliente: {
