@@ -199,13 +199,7 @@ function crearTarjetaProducto(producto) {
     acciones.append(labelCantidad, cantidad, boton);
 
     // Añadir elementos a la tarjeta
-    tarjeta.append(
-        nombre,
-        categoria,
-        precio,
-        existencias,
-        acciones
-    );
+    tarjeta.append(nombre, categoria, precio, existencias, acciones);
 
     return tarjeta;
 }
@@ -234,4 +228,52 @@ function mostrarCatalogo(productos) {
         listaProductos.append(tarjeta);
     });
 }
-mostrarCatalogo(catalogo);
+
+// Fase 5
+
+// Normalizar texto
+function normalizarTexto(texto) {
+    return texto.trim().toLowerCase()
+}
+
+// Filtrar productos
+function filtrarProductos(catalogo, texto, categoria) {
+    const textoNormalizado = normalizarTexto(texto);
+
+    const productosFiltrados = catalogo.filter((producto) => {
+        const nombre = normalizarTexto(producto.nombre);
+
+        const coincideNombre = nombre.includes(textoNormalizado);
+
+        const coincideCategoria = categoria === "todas" || producto.categoria === categoria;
+
+        return coincideNombre && coincideCategoria;
+    });
+
+    return productosFiltrados;
+}
+
+// Actualizar catálogo
+function actualizarCatalogo() {
+    const texto = document.querySelector("#busqueda").value;
+    const categoria = document.querySelector("#categoria").value;
+
+    const productosFiltrados = filtrarProductos(catalogo, texto, categoria);
+
+    mostrarCatalogo(productosFiltrados);
+}
+
+// Eventos de búsqueda y categoría
+const busqueda = document.querySelector("#busqueda");
+const selectCategoria = document.querySelector("#categoria");
+
+// input: actualiza los resultados mientras escribes.
+busqueda.addEventListener("input", () => {
+    actualizarCatalogo();
+});
+
+// change: actualiza los resultados cuando cambias la categoría.
+selectCategoria.addEventListener("change", () => {
+    actualizarCatalogo();
+});
+actualizarCatalogo();
