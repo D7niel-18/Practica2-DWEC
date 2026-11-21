@@ -1,7 +1,7 @@
 # Práctica DWEC – Gestión de catálogo, carrito y pedidos
 
 **Autor:** [Daniel Jimenez Ramirez]
-**IA:** [[COMPLETAR: enlace a GitHub](https://claude.ai/share/d59bbb86-fa60-4298-8ab7-875529a71af9)]
+**IA:** [[Claude: Practica 2 DWEC](https://claude.ai/share/d59bbb86-fa60-4298-8ab7-875529a71af9)]
 
 ## 1. Descripción del proyecto
 
